@@ -49,8 +49,11 @@ jobs:
       matrix:
         include:
           - target: x86_64-pc-windows-gnu
+            archive: zip
           - target: x86_64-unknown-linux-musl
+            archive: tar.gz tar.zst
           - target: x86_64-apple-darwin
+            archive: zip
     steps:
     - name: Checkout repository
       id: checkout
@@ -61,10 +64,13 @@ jobs:
     - name: Compile ${{ matrix.target }}
       id: compile
       uses: rust-build/rust-build.action@v1.4.3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         RUSTTARGET: ${{ matrix.target }}
+        ARCHIVE_TYPES: ${{ matrix.archive }}
+        ARCHIVE_NAME: TurunMap-${{ needs.create-release.outputs.version }}.${{ matrix.archive }}
+        MINIFY: true
         UPLOAD_MODE: none
 
     - name: Upload ${{ matrix.target }} to Release
@@ -74,6 +80,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_name: TurunMap-${{ matrix.target }}-${{ needs.create-release.outputs.version }}
+        asset_name: TurunMap-${{ needs.create-release.outputs.version }}-${{ matrix.target }}.${{ matrix.archive }}
         asset_path: ${{ steps.compile.outputs.BUILT_ARCHIVE }}
         asset_content_type: application/octet-stream
