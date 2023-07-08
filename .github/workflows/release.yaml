@@ -19,11 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
-      rg_version: ${{ env.VERSION }}
+      version: ${{ env.VERSION }}
     steps:
       - name: Get the release version from the tag
         shell: bash
-        if: env.RG_VERSION == ''
+        if: env.VERSION == ''
         run: |
           # Apparently, this is the right way to get a tag name. Really?
           #
@@ -74,6 +74,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_name: TurunMap-${{ matrix.target }}-${{ env.VERSION }}
+        asset_name: TurunMap-${{ matrix.target }}-${{ needs.create-release.outputs.version }}
         asset_path: ${{ steps.compile.outputs.BUILT_ARCHIVE }}
         asset_content_type: application/octet-stream
